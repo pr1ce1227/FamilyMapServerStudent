@@ -1,0 +1,3 @@
+How are id parameters passed in without a Service Request?
+What other services do we need/ how to decide?
+How does the decerialization work? Do i just create a class in the responce request that has no functions?
