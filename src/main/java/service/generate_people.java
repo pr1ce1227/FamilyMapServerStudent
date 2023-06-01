@@ -34,17 +34,25 @@ public class generate_people {
         lNames = (lastNames)gson.fromJson(reader4, lastNames.class);
 
     }
-    public Person generatePerson(String gender, int generations, String username){
+    public Person generatePerson(String gender, int genLevel, String username, int generations){
+
+        /////////////////////
         // Person Creation //
+        /////////////////////
 
         Person mother = null;
         Person father = null;
+        boolean user = false;
 
-        if(generations >= 1){
-            mother = generatePerson("f", generations - 1, username);
-            father = generatePerson("m", generations - 1, username);
+        if(genLevel >= 1){
+            mother = generatePerson("f", genLevel - 1, username, generations);
+            father = generatePerson("m", genLevel - 1, username, generations);
             mother.setSpouseId(father.getPersonID());
             father.setSpouseId(mother.getPersonID());
+        }
+
+        if(genLevel == generations && father != null){
+            user = true;
         }
 
         Person person = new Person();
@@ -59,7 +67,13 @@ public class generate_people {
             person.setFirstName(mNames.getMaleName());
         }
 
-        person.setLastName(lNames.getLastName());
+        if(father == null) {
+            person.setLastName(lNames.getLastName());
+        }
+        else{
+            person.setLastName(father.getLastName());
+        }
+
 
         person.setAssociatedUsername(username);
 
@@ -88,39 +102,73 @@ public class generate_people {
             System.out.println("Failed to add person");
         }
 
-        // Event Creation //
-        location Loc = locData.getLocation();
-        String eventIDBIRTH = UUID.randomUUID().toString();
-        String eventIDMARRIAGE = UUID.randomUUID().toString();
-        String eventIDDEATH = UUID.randomUUID().toString();
-        Random random = new Random();
-        int ranNum = random.nextInt(1900) + 100;
-        boolean user;
-        Event eventBirth;
-        Event eventMarriage = null;
-        Event eventDeath = null;
+        ////////////
+        // Events //
+        ////////////
 
-        if(person.getFatherId() != null && person.getSpouseId() == null) {
-            eventBirth = new Event(eventIDBIRTH, username, personID, Loc.getLatitude(), Loc.getLongitude(), Loc.getCountry(), Loc.getCity(), "Birth", ranNum);
-            user = true;
+        //Locations
+        location momBirthLoc = locData.getLocation();
+        location dadBirthLoc = locData.getLocation();
+        location marriageLoc = locData.getLocation();
+        location deathLoc = locData.getLocation();
+
+        // ID's
+        String personBirthID = UUID.randomUUID().toString();
+        String momMarriageID = UUID.randomUUID().toString();
+        String dadMarriageID = UUID.randomUUID().toString();
+        String momBirthID = UUID.randomUUID().toString();
+        String dadBirthdID = UUID.randomUUID().toString();
+        String momDeathID = UUID.randomUUID().toString();
+        String dadDeathID = UUID.randomUUID().toString();
+
+        // Random number generator
+        Random random = new Random();
+
+        // Years
+        int momBirthYear = random.nextInt(100) + 1900;
+        int dadBirthYear = random.nextInt(7) + momBirthYear;
+        int marriageYear = random.nextInt(10) + dadBirthYear + 13;
+        int personBirthYear = random.nextInt(6) + 13 + marriageYear;
+        int momDeathYear = personBirthYear + random.nextInt(55) + 1;
+        int dadDeathYear = personBirthYear + random.nextInt(55) + 1;
+
+        // Events
+        Event personBirth = null;
+        Event momBirth = null;
+        Event dadBirth = null;
+        Event momMarriage = null;
+        Event dadMarriage = null;
+        Event momDeath = null;
+        Event dadDeath = null;
+
+        // Event creation
+        if(user) {
+            personBirth = new Event(personBirthID, username, personID, marriageLoc.getLatitude(), marriageLoc.getLongitude(), marriageLoc.getCountry(), marriageLoc.getCity(), "Birth", personBirthYear);
         }
-        else{
-            eventBirth = new Event(eventIDBIRTH, username, personID, Loc.getLatitude(), Loc.getLongitude(), Loc.getCountry(), Loc.getCity(), "Birth", ranNum);
-            eventMarriage = new Event(eventIDMARRIAGE, username, personID, Loc.getLatitude(), Loc.getLongitude(), Loc.getCountry(), Loc.getCity(), "Marriage", ranNum);
-            eventDeath = new Event(eventIDDEATH, username, personID, Loc.getLatitude(), Loc.getLongitude(), Loc.getCountry(), Loc.getCity(), "Death", ranNum);
-            user = false;
+        if(father != null) {
+            momBirth = new Event(momBirthID, username, mother.getPersonID(), momBirthLoc.getLatitude(), momBirthLoc.getLongitude(), momBirthLoc.getCountry(), momBirthLoc.getCity(), "Birth", momBirthYear);
+            dadBirth = new Event(dadBirthdID, username, father.getPersonID(), dadBirthLoc.getLatitude(), dadBirthLoc.getLongitude(), dadBirthLoc.getCountry(), dadBirthLoc.getCity(), "Birth", dadBirthYear);
+            momMarriage = new Event(momMarriageID, username, mother.getPersonID(), marriageLoc.getLatitude(), marriageLoc.getLongitude(), marriageLoc.getCountry(), marriageLoc.getCity(), "Marriage", marriageYear);
+            dadMarriage = new Event(dadMarriageID, username, father.getPersonID(), marriageLoc.getLatitude(), marriageLoc.getLongitude(), marriageLoc.getCountry(), marriageLoc.getCity(), "Marriage", marriageYear);
+            momDeath = new Event(momDeathID, username, mother.getPersonID(), deathLoc.getLatitude(), deathLoc.getLongitude(), deathLoc.getCountry(), deathLoc.getCity(), "Death", momDeathYear);
+            dadDeath = new Event(dadDeathID, username, father.getPersonID(), deathLoc.getLatitude(), deathLoc.getLongitude(), deathLoc.getCountry(), deathLoc.getCity(), "Death", dadDeathYear);
         }
+
 
 
         // Event Insert //
-
-        db = new Database();
         try{
             EventDAO ed = new EventDAO(db.openConnection());
-            ed.insert(eventBirth);
-            if(!user){
-                ed.insert(eventMarriage);
-                ed.insert(eventDeath);
+            if(user) {
+                ed.insert(personBirth);
+            }
+            if(father != null) {
+                ed.insert(momBirth);
+                ed.insert(dadBirth);
+                ed.insert(momMarriage);
+                ed.insert(dadMarriage);
+                ed.insert(momDeath);
+                ed.insert(dadDeath);
             }
             db.closeConnection(true);
         }

@@ -22,7 +22,7 @@ public class Person_Service {
     }
 
     public void addPeople(){
-        gp.generatePerson("m", 1, "username");
+        gp.generatePerson("m", 3,  "username", 3);
     }
 
 }

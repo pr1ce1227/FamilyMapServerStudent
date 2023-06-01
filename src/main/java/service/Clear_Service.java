@@ -1,9 +1,6 @@
 package service;
 
-import dao.DataAccessException;
-import dao.Database;
-import dao.PersonDAO;
-import dao.UserDAO;
+import dao.*;
 import request_result.Clear_Responce;
 
 public class Clear_Service {
@@ -17,6 +14,10 @@ public class Clear_Service {
             ud.clear();
             PersonDAO pd = new PersonDAO(db.getConnection());
             pd.clear();
+            EventDAO ed = new EventDAO(db.getConnection());
+            ed.clear();
+            AuthtokenDAO ad = new AuthtokenDAO(db.getConnection());
+            ad.clear();
             cr = new Clear_Responce(null, true);
             db.closeConnection(true);
         }

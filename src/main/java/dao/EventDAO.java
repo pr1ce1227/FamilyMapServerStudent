@@ -1,6 +1,7 @@
 package dao;
 
 import model.Event;
+import model.Person;
 
 import java.sql.*;
 
@@ -82,6 +83,26 @@ public class EventDAO {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    public void update(Event e) throws DataAccessException {
+        String sql = "UPDATE Events SET eventID = ?, associatedUsername = ?, latitude = ?, longitude = ?, country = ?, city = ?, eventType = ?, year = ? WHERE personID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setString(1, e.getEventID());
+            stmt.setString(2, e.getAssociatedUsername());
+            stmt.setFloat(3, e.getLatitude());
+            stmt.setFloat(4, e.getLongitude());
+            stmt.setString(5, e.getCountry());
+            stmt.setString(6, e.getCity());
+            stmt.setString(7, e.getEventType());
+            stmt.setInt(8, e.getYear());
+            stmt.setString(9, e.getPersonID());
+            // execute the delete statement
+            stmt.executeUpdate();
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
     }
 }
