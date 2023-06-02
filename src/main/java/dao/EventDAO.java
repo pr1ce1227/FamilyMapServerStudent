@@ -2,6 +2,7 @@ package dao;
 
 import model.Event;
 import model.Person;
+import model.User;
 
 import java.sql.*;
 
@@ -71,13 +72,13 @@ public class EventDAO {
         }
     }
 
-    public void delete(Event ev) throws DataAccessException {
-        String sql = "DELETE FROM Events WHERE eventID = ?";
+    public void delete(User user) throws DataAccessException {
+        String sql = "DELETE FROM Events WHERE associatedUsername = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param
-            stmt.setString(1, ev.getEventID());
+            stmt.setString(1, user.getUsername());
             // execute the delete statement
             stmt.executeUpdate();
 

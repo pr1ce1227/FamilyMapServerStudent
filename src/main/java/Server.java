@@ -94,6 +94,12 @@ public class Server {
 		// "/routes/claim" URL path, it will forward the request to ClaimRouteHandler
 		// for processing.
 		server.createContext("/user/register", new RegisterHandler());
+
+		server.createContext("/user/login", new LoginHandler());
+
+		server.createContext("/load", new LoadHandler());
+
+		server.createContext("/fill", new FillHandler());
 		
 		// Create and install the "default" (or "file") HTTP handler.
 		// All requests that do not match the other handler URLs

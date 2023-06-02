@@ -6,6 +6,7 @@ import java.util.List;
 import model.Event;
 import model.Person;
 import java.sql.*;
+import model.User;
 
 /**
  * Interface for the person objects and the data base
@@ -80,13 +81,13 @@ public class PersonDAO {
         }
     }
 
-    public void delete(Person p) throws DataAccessException {
-        String sql = "DELETE FROM person WHERE personID = ?";
+    public void delete(User user) throws DataAccessException {
+        String sql = "DELETE FROM person WHERE associatedUsername = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param
-            stmt.setString(1, p.getPersonID());
+            stmt.setString(1, user.getUsername());
             // execute the delete statement
             stmt.executeUpdate();
 

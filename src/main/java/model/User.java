@@ -33,7 +33,7 @@ public class User {
     /**
      * id of the person who has created the user account
      */
-    private String personId;
+    private String personID;
 
     /**
      * Construct to set all of the users account information
@@ -43,16 +43,17 @@ public class User {
      * @param firstName
      * @param lastName
      * @param gender
-     * @param personId
+     * @param personID
      */
-    public User(String username, String password, String email, String firstName, String lastName, String gender, String personId){
+    public User(String username, String password, String email, String firstName, String lastName, String gender, String personID){
         this.username = username;
         this.password = password;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.gender = gender;
-        this.personId = personId;
+        this.personID = personID;
+
     }
 
     public String getUsername() {
@@ -104,11 +105,11 @@ public class User {
     }
 
     public String getPersonId() {
-        return personId;
+        return personID;
     }
 
     public void setPersonId(String personId) {
-        this.personId = personId;
+        this.personID = personId;
     }
 
     /**
@@ -121,6 +122,6 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(email, user.email) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(gender, user.gender) && Objects.equals(personId, user.personId);
+        return Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(email, user.email) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(gender, user.gender) && Objects.equals(personID, user.personID);
     }
 }

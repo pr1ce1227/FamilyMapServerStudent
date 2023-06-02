@@ -22,6 +22,16 @@ public class Login_Responce
      */
     private boolean success;
 
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     /**
      * initialize the loggin responce variables
      * @param authtoken
@@ -29,11 +39,12 @@ public class Login_Responce
      * @param personID
      * @param success
      */
-    public Login_Responce(String authtoken, String  username, String  personID, boolean success){
+    public Login_Responce(String authtoken, String  username, String  personID, boolean success, String message){
         this.authtoken = authtoken;
         this. username = username;
         this. personID = personID;
         this.success = success;
+        this.message = message;
     }
 
     public String getAuthtoken() {
