@@ -18,9 +18,9 @@ public class Fill_Responce {
     /**
      * Initialize the message and succes boolean
      */
-    public Fill_Responce(String message, boolean succes){
+    public Fill_Responce(String message, boolean success){
         this.message = message;
-        this.success = succes;
+        this.success = success;
     }
 
     public String getMessage() {

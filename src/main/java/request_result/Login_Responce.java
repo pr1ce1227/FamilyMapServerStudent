@@ -59,7 +59,8 @@ public class Login_Responce
         return personID;
     }
 
-    public boolean isSuccess() {
+    public boolean getSuccess() {
         return success;
     }
+
 }

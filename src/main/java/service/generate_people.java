@@ -2,16 +2,15 @@ package service;
 
 import com.google.gson.Gson;
 import dao.DataAccessException;
-import dao.Database;
 import dao.EventDAO;
 import dao.PersonDAO;
 import data.*;
 import model.Event;
+
+import java.sql.Connection;
 import java.util.Random;
 import model.Person;
 
-import javax.xml.crypto.Data;
-import javax.xml.stream.Location;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
@@ -34,7 +33,7 @@ public class generate_people {
         lNames = (lastNames)gson.fromJson(reader4, lastNames.class);
 
     }
-    public Person generatePerson(String gender, int genLevel, String username, int generations){
+    public Person generatePerson(String gender, int genLevel, String username, int generations, Connection conn){
 
         /////////////////////
         // Person Creation //
@@ -45,10 +44,10 @@ public class generate_people {
         boolean user = false;
 
         if(genLevel >= 1){
-            mother = generatePerson("f", genLevel - 1, username, generations);
-            father = generatePerson("m", genLevel - 1, username, generations);
-            mother.setSpouseId(father.getPersonID());
-            father.setSpouseId(mother.getPersonID());
+            mother = generatePerson("f", genLevel - 1, username, generations, conn);
+            father = generatePerson("m", genLevel - 1, username, generations, conn);
+            mother.setSpouseID(father.getPersonID());
+            father.setSpouseID(mother.getPersonID());
         }
 
         if(genLevel == generations && father != null){
@@ -78,27 +77,24 @@ public class generate_people {
         person.setAssociatedUsername(username);
 
         if(mother != null){
-            person.setMotherId(mother.getPersonID());
+            person.setMotherID(mother.getPersonID());
         }
         if(father != null ){
-            person.setFatherId(father.getPersonID());
+            person.setFatherID(father.getPersonID());
         }
 
         // Person Insert //
 
-        Database db = new Database();
         try {
-            PersonDAO pd = new PersonDAO(db.openConnection());
+            PersonDAO pd = new PersonDAO(conn);
             pd.insert(person);
             if(father != null){
                 pd.update(father);
                 pd.update(mother);
             }
-            db.closeConnection(true);
             System.out.println("Adding person");
         }
         catch(DataAccessException da){
-            db.closeConnection(false);
             System.out.println("Failed to add person");
         }
 
@@ -158,7 +154,7 @@ public class generate_people {
 
         // Event Insert //
         try{
-            EventDAO ed = new EventDAO(db.openConnection());
+            EventDAO ed = new EventDAO(conn);
             if(user) {
                 ed.insert(personBirth);
             }
@@ -170,10 +166,8 @@ public class generate_people {
                 ed.insert(momDeath);
                 ed.insert(dadDeath);
             }
-            db.closeConnection(true);
         }
         catch(DataAccessException da){
-            db.closeConnection(false);
             System.out.println("Failed to add event to person");
         }
 

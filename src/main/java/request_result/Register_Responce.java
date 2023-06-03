@@ -51,7 +51,11 @@ public class Register_Responce {
 
     public String getMessage(){return  message;}
 
-    public boolean isSuccess() {
+    public boolean getSuccess() {
         return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }

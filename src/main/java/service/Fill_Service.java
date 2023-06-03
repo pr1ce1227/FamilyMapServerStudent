@@ -18,33 +18,32 @@ public class Fill_Service {
             UserDAO ud = new UserDAO(db.openConnection());
             if(ud.find(userName) != null){
                 User user =  ud.find(userName);
-//                ud.delete(user);
                 PersonDAO pd = new PersonDAO(db.getConnection());
                 pd.delete(user);
                 EventDAO ed = new EventDAO(db.getConnection());
                 ed.delete(user);
-//                AuthtokenDAO ad = new AuthtokenDAO(db.getConnection());
-//                ad.delete(userName);
                 Register_Responce rep = null;
                 Person person = null;
-                db.closeConnection(true);
                 generate_people gp = new generate_people();
-                person = gp.generatePerson(user.getGender(), generations, user.getUsername(), generations);
-                pd = new PersonDAO(db.openConnection());
+
+                person = gp.generatePerson(user.getGender(), generations, user.getUsername(), generations, db.getConnection());
+
+                // ******************************************** only use one connection
+                pd = new PersonDAO(db.getConnection());
                 person.setLastName(user.getLastName());
                 person.setFirstName(user.getFirstName());
                 pd.update(person);
-                fr = new Fill_Responce("Success: removed " + user.getUsername(), true);
+                int numPeople = pd.getPeople(person.getAssociatedUsername()).length;
+                ed = new EventDAO(db.getConnection());
+                int numEvents = ed.getEvents(person.getAssociatedUsername()).length;
+                fr = new Fill_Responce("Successfully added " + numPeople + " persons and " + numEvents + " events to the database.", true);
                 db.closeConnection(true);
                 return fr;
             }
             db.closeConnection(false);
         }
-        catch (DataAccessException e) {
+        catch (DataAccessException | FileNotFoundException e) {
             db.closeConnection(false);
-            throw new RuntimeException(e);
-        }
-        catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
 

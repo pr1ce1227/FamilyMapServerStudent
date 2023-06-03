@@ -28,12 +28,11 @@ public class Register_Service {
         Person person = null;
         try {
             generate_people gp = new generate_people();
-            person = gp.generatePerson(req.getGender(), 4, req.getUsername(), 4);
+            person = gp.generatePerson(req.getGender(), 4, req.getUsername(), 4, db.openConnection());
             person.setLastName(req.getLastName());
             person.setFirstName(req.getFirstName());
-            PersonDAO pd = new PersonDAO(db.openConnection());
+            PersonDAO pd = new PersonDAO(db.getConnection());
             pd.update(person);
-            db.closeConnection(true);
         }
         catch (FileNotFoundException | DataAccessException e) {
             throw new RuntimeException(e);
@@ -41,7 +40,7 @@ public class Register_Service {
 
         User user = new User(req.getUsername(), req.getPassword(), req.getEmail(), req.getFirstName(), req.getLastName(), req.getGender(), person.getPersonID());
         try {
-            UserDAO ud = new UserDAO(db.openConnection());
+            UserDAO ud = new UserDAO(db.getConnection());
             ud.insert(user);
             String authToken = UUID.randomUUID().toString();
             rep = new Register_Responce(authToken, req.getUsername(), person.getPersonID(), true, null);
@@ -51,7 +50,7 @@ public class Register_Service {
             db.closeConnection(true);
         }
         catch (DataAccessException da){
-            rep = new Register_Responce(null, null, null, false, "Failed to insert user");
+            rep = new Register_Responce(null, null, null, false, "Error: Failed to insert user");
             db.closeConnection(false);
         }
         return rep;

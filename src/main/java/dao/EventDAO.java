@@ -5,6 +5,8 @@ import model.Person;
 import model.User;
 
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class EventDAO {
     private final Connection conn;
@@ -105,5 +107,40 @@ public class EventDAO {
         catch (SQLException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    public Event[] getEvents(String username){
+        Set<Event> events = new HashSet<>();
+
+        Event event = null;
+        ResultSet rs;
+        String sql = "SELECT * FROM Events WHERE associatedUsername = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                event = new Event(rs.getString("eventID"), rs.getString("associatedUsername"),
+                        rs.getString("personID"), rs.getFloat("latitude"), rs.getFloat("longitude"),
+                        rs.getString("country"), rs.getString("city"), rs.getString("eventType"), rs.getInt("year"));
+                events.add(event);
+            }
+            if(events.isEmpty()){
+                return null;
+            }
+            else{
+                Event[] rEvent = new Event[events.size()];
+                int i = 0;
+                for(Event e : events){
+                    rEvent[i] = e;
+                    ++i;
+                }
+                return  rEvent;
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return  null;
     }
 }

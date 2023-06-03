@@ -72,6 +72,25 @@ public class AuthtokenDAO {
         }
     }
 
+    public String findUsername(String token) throws DataAccessException{
+        ResultSet rs;
+        Authtoken at;
+        String sql = "SELECT * FROM Authtoken WHERE authtoken = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, token);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                at = new Authtoken(rs.getString("authtoken"), rs.getString("username"));
+                return at.getUsername();
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DataAccessException("Error encountered while finding a user in the database");
+        }
+    }
+
     /**
      * list all of the tokens currently in the database
      * @return

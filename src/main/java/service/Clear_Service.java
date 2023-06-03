@@ -18,11 +18,11 @@ public class Clear_Service {
             ed.clear();
             AuthtokenDAO ad = new AuthtokenDAO(db.getConnection());
             ad.clear();
-            cr = new Clear_Responce(null, true);
+            cr = new Clear_Responce("Clear succeeded.", true);
             db.closeConnection(true);
         }
         catch (DataAccessException da){
-            cr = new Clear_Responce("Failed to clear", false);
+            cr = new Clear_Responce("Error: Failed to clear", false);
             db.closeConnection(false);
         }
         return  cr;

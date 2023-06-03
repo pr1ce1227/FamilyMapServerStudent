@@ -3,14 +3,14 @@ package data;
 import model.Event;
 
 public class events {
-    Event[] events;
+    Event[] data;
 
-    public events(Event[] events){
-        this.events = events;
+    public events(Event[] data){
+        this.data = data;
 
     }
 
     public Event[] getEvents() {
-        return events;
+        return data;
     }
 }

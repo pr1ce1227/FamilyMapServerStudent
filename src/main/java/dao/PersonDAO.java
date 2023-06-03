@@ -1,11 +1,12 @@
 package dao;
 
 import java.sql.Connection;
-import java.util.List;
+import java.util.HashSet;
 
-import model.Event;
 import model.Person;
 import java.sql.*;
+import java.util.Set;
+
 import model.User;
 
 /**
@@ -38,9 +39,9 @@ public class PersonDAO {
             stmt.setString(3, person.getFirstName());
             stmt.setString(4, person.getLastName());
             stmt.setString(5, person.getGender());
-            stmt.setString(6, person.getFatherId());
-            stmt.setString(7, person.getMotherId());
-            stmt.setString(8, person.getSpouseId());
+            stmt.setString(6, person.getFatherID());
+            stmt.setString(7, person.getMotherID());
+            stmt.setString(8, person.getSpouseID());
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -68,7 +69,6 @@ public class PersonDAO {
             e.printStackTrace();
             throw new DataAccessException("Error encountered while finding a person in the database");
         }
-
     }
 
     public void clear() throws DataAccessException {
@@ -103,9 +103,9 @@ public class PersonDAO {
             stmt.setString(2, p.getLastName());
             stmt.setString(3, p.getAssociatedUsername());
             stmt.setString(4, p.getGender());
-            stmt.setString(5, p.getFatherId());
-            stmt.setString(6, p.getMotherId());
-            stmt.setString(7, p.getSpouseId());
+            stmt.setString(5, p.getFatherID());
+            stmt.setString(6, p.getMotherID());
+            stmt.setString(7, p.getSpouseID());
             stmt.setString(8, p.getPersonID());
             // execute the delete statement
             stmt.executeUpdate();
@@ -120,7 +120,40 @@ public class PersonDAO {
      * list all of the people currently in the data base
      * @return a list of people objects
      */
-    public List<Person> getPeople(){return  null;}
+    public Person[] getPeople(String username){
+        Set<Person> persons = new HashSet<>();
+
+        Person person = null;
+        ResultSet rs;
+        String sql = "SELECT * FROM person WHERE associatedUsername = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                person = new Person(rs.getString("personID"), rs.getString("associatedUsername"),
+                        rs.getString("firstName"), rs.getString("lastName"), rs.getString("gender"),
+                        rs.getString("fatherID"), rs.getString("motherID"), rs.getString("spouseID"));
+                persons.add(person);
+            }
+            if(persons.isEmpty()){
+                return null;
+            }
+            else{
+                Person[] people = new Person[persons.size()];
+                int i = 0;
+                for(Person p : persons){
+                    people[i] = p;
+                    ++i;
+                }
+                return  people;
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return  null;
+    }
 
 
 }

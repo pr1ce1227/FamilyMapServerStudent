@@ -42,12 +42,12 @@ public class Person_Responce {
     private String spouseID;
     /**
      * wether or not the person was retrieved succesfully
+     *
+     *
      */
+    private String message;
     private boolean success;
-    /**
-     * Either a success or failure message
-     */
-    private String messgae;
+
 
     /**
      * initialize the reponce variables
@@ -60,9 +60,8 @@ public class Person_Responce {
      * @param motherID
      * @param spouseID
      * @param success
-     * @param messgae
      */
-    public Person_Responce(String associatedUsername, String personID, String  firstName, String lastName, String gender, String fatherID, String motherID,   String spouseID, boolean success, String messgae){
+    public Person_Responce(String associatedUsername, String personID, String  firstName, String lastName, String gender, String fatherID, String motherID,   String spouseID,  String message, boolean success){
         this.associatedUsername = associatedUsername;
         this.personID = personID;
         this.firstName = firstName;
@@ -71,8 +70,9 @@ public class Person_Responce {
         this.fatherID = fatherID;
         this.motherID = motherID;
         this.spouseID = spouseID;
+        this.message = message;
         this.success = success;
-        this.messgae = messgae;
+
     }
 
     public String getAssociatedUsername() {
@@ -107,11 +107,12 @@ public class Person_Responce {
         return spouseID;
     }
 
-    public boolean isSuccess() {
+    public boolean getSuccess() {
         return success;
     }
 
-    public String getMessgae() {
-        return messgae;
+    public String getMessage() {
+        return message;
     }
+
 }

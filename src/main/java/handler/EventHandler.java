@@ -5,14 +5,13 @@ import java.net.*;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.*;
-import data.persons;
-import model.Person;
-import request_result.PersonFamily_Responce;
-import request_result.Person_Request;
-import request_result.Person_Responce;
-import service.Person_Service;
-import java.nio.file.Files;
-import java.io.File;
+import data.events;
+import request_result.EventAll_Responce;
+import request_result.Event_Request;
+import request_result.Event_Responce;
+import service.Event_Service;
+
+
 
 /*
 	The ListGamesHandler is the HTTP handler that processes
@@ -24,7 +23,7 @@ import java.io.File;
 	receives a request containing the "/games/list" URL path, it calls
 	ListGamesHandler.handle() which actually processes the request.
 */
-public class PersonHandler implements HttpHandler {
+public class EventHandler implements HttpHandler {
 
     // Handles HTTP requests containing the "/games/list" URL path.
     // The "exchange" parameter is an HttpExchange object, which is
@@ -76,30 +75,29 @@ public class PersonHandler implements HttpHandler {
                     // Extract the auth token from the "Authorization" header
                     String authToken = reqHeaders.getFirst("Authorization");
 
-
+                    // This is the JSON data we will return in the HTTP response body
+                    // (this is unrealistic because it always returns the same answer).
                     String uri = exchange.getRequestURI().toString();
-                    String[] personInfo = uri.split("/");
-                    if (personInfo.length > 1 && personInfo.length < 4) {
+                    String[] eventInfo = uri.split("/");
+                    if (eventInfo.length > 1 && eventInfo.length < 4) {
+                        Event_Request req = null;
+                        Event_Service service = new Event_Service();
+                        Event_Responce result = null;
+                        EventAll_Responce resultMulti = null;
 
-                        Person_Service service = new Person_Service();
-                        Person_Responce result = null;
-                        PersonFamily_Responce resultMulti = null;
-
-                        if (personInfo.length == 3) {
-                            Person_Request req = new Person_Request(personInfo[2], authToken);
-                            result = service.getPersonObject(req);
+                        if (eventInfo.length == 3) {
+                            req = new Event_Request(eventInfo[2], authToken);
+                            result = service.getEventObject(req);
                         }
                         else {
-                            resultMulti = service.getPersonFamily(authToken);
+                            resultMulti = service.getFamilyEvents(authToken);
                         }
-
-                        if(personInfo.length == 3 && result.getSuccess() || personInfo.length == 2 && resultMulti.getSuccess()) {
+                        if(eventInfo.length == 3 && result.isSucces() || eventInfo.length == 2 && resultMulti.isSuccess()) {
                             exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
                         }
                         else{
                             exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
                         }
-
                         OutputStream resBody = (OutputStream) exchange.getResponseBody();
                         String result_final = null;
                         if (result != null) {
@@ -152,4 +150,3 @@ public class PersonHandler implements HttpHandler {
         sw.flush();
     }
 }
-

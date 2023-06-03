@@ -19,11 +19,11 @@ public class Event_Responce {
     /**
      * latitude location in the world where the event occured
      */
-    private float latitude;
+    private Float latitude;
     /**
      * longitude located of where the event occured
      */
-     private float longitude;
+     private Float longitude;
     /**
      * country where the event occured
      */
@@ -39,11 +39,11 @@ public class Event_Responce {
     /**
      * year when the event occured
      */
-     private int year;
+     private Integer year;
     /**
      * wether or not the event was succesfully added
      */
-    private boolean succes;
+    private boolean success;
     /**
      * Either a success or failur message
      */
@@ -63,7 +63,7 @@ public class Event_Responce {
      * @param succes
      * @param message
      */
-    public Event_Responce(String associatedUsername, String eventID, String personID, float latitude, float longitude, String country, String city, String eventType, int year, boolean succes, String message) {
+    public Event_Responce(String associatedUsername, String eventID, String personID, Float latitude, Float longitude, String country, String city, String eventType, Integer year, boolean succes, String message) {
         this.associatedUsername = associatedUsername;
         this.eventID = eventID;
         this.personID = personID;
@@ -73,7 +73,7 @@ public class Event_Responce {
         this.city = city;
         this.eventType = eventType;
         this.year = year;
-        this.succes = succes;
+        this.success = succes;
         this.message = message;
     }
 
@@ -114,6 +114,6 @@ public class Event_Responce {
     }
 
     public boolean isSucces() {
-        return succes;
+        return success;
     }
 }

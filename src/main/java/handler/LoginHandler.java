@@ -74,22 +74,17 @@ public class LoginHandler implements HttpHandler {
 
                 Login_Service service = new Login_Service();
                 Login_Responce result = service.login(request);
-
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+                if(result.getSuccess()) {
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+                }
+                else{
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+                }
                 OutputStream resBody = (OutputStream)exchange.getResponseBody();
                 String result_final = gson.toJson(result);
                 writeString(result_final, resBody);
 
                 resBody.close();
-
-
-                // Start sending the HTTP response to the client, starting with
-                // the status code and any defined headers.
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-
-                // We are not sending a response body, so close the response body
-                // output stream, indicating that the response is complete.
-                exchange.getResponseBody().close();
 
                 success = true;
             }

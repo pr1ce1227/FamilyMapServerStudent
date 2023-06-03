@@ -100,6 +100,10 @@ public class Server {
 		server.createContext("/load", new LoadHandler());
 
 		server.createContext("/fill", new FillHandler());
+
+		server.createContext("/event", new EventHandler());
+
+
 		
 		// Create and install the "default" (or "file") HTTP handler.
 		// All requests that do not match the other handler URLs
