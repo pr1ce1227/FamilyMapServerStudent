@@ -61,12 +61,14 @@ public class Event_Service {
 
                 return new EventAll_Responce(EV.getEvents(), null, true);
             }
+            else{
+                db.closeConnection(false);
+            }
         }
         catch (DataAccessException e) {
             db.closeConnection(false);
             throw new RuntimeException(e);
         }
-        db.closeConnection(false);
         EventAll_Responce ea = new EventAll_Responce(null, "Error: Authoken wasnt found", false);
         return ea;
     }

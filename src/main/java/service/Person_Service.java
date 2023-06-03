@@ -62,6 +62,7 @@ public class Person_Service {
                 db.closeConnection(true);
                 return new PersonFamily_Responce(people, null, true);
             }
+            db.closeConnection(false);
         }
         catch (DataAccessException e) {
             db.closeConnection(false);

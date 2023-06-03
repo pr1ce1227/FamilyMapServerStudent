@@ -9,8 +9,8 @@ public class Clear_Service {
         Clear_Responce cr = null;
         Database db = new Database();
         try {
-
-            UserDAO ud = new UserDAO(db.openConnection());
+            db.openConnection();
+            UserDAO ud = new UserDAO(db.getConnection());
             ud.clear();
             PersonDAO pd = new PersonDAO(db.getConnection());
             pd.clear();

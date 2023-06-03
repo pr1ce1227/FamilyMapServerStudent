@@ -17,6 +17,11 @@ import java.io.Reader;
 import java.util.UUID;
 
 public class generate_people {
+    static int momYearInit = 1850;
+    static int dadYearInit = 1852;
+
+    static int momYear;
+    static int dadYear;
     maleNames mNames;
     femaleNames fNames;
     LocationData locData;
@@ -120,13 +125,39 @@ public class generate_people {
         // Random number generator
         Random random = new Random();
 
+        int momBirthYear = 0;
+        int dadBirthYear = 0;
+        int marriageYear = 0;
+        int personBirthYear = 0;
+        int momDeathYear = 0;
+        int dadDeathYear = 0;
         // Years
-        int momBirthYear = random.nextInt(100) + 1900;
-        int dadBirthYear = random.nextInt(7) + momBirthYear;
-        int marriageYear = random.nextInt(10) + dadBirthYear + 13;
-        int personBirthYear = random.nextInt(6) + 13 + marriageYear;
-        int momDeathYear = personBirthYear + random.nextInt(55) + 1;
-        int dadDeathYear = personBirthYear + random.nextInt(55) + 1;
+        if(person.getMotherID() == null) {
+            momBirthYear = momYearInit;
+            dadBirthYear = dadYearInit;
+            marriageYear = random.nextInt(1) + dadBirthYear + 13;
+            personBirthYear = random.nextInt(1) + 13 + marriageYear;
+            momDeathYear = personBirthYear + random.nextInt(55) + 1;
+            dadDeathYear = personBirthYear + random.nextInt(55) + 1;
+            momYear = momYearInit;
+            dadYear = dadYearInit;
+        }
+        else{
+            momBirthYear = momYear + 23 +random.nextInt(5);
+            dadBirthYear = dadYear + 23 + random.nextInt(5);
+            if(momBirthYear < dadBirthYear) {
+                marriageYear = dadBirthYear + 14 + random.nextInt((7));
+            }
+            else {
+                marriageYear = momBirthYear + 14 + random.nextInt((7));
+            }
+            personBirthYear = marriageYear + 16;
+            momDeathYear = momBirthYear + 50 + random.nextInt(65);
+            dadDeathYear = dadBirthYear + 50 + random.nextInt(60);
+            momYear = momBirthYear;
+            dadYear = dadBirthYear;
+        }
+
 
         // Events
         Event personBirth = null;
