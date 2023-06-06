@@ -9,7 +9,6 @@ public class events {
         this.data = data;
 
     }
-
     public Event[] getEvents() {
         return data;
     }

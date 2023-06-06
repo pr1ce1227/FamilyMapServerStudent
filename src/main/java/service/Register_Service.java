@@ -2,16 +2,12 @@ package service;
 
 import dao.*;
 import model.Authtoken;
-import model.Event;
-
 import java.io.FileNotFoundException;
 import java.util.UUID;
 import model.User;
 import model.Person;
 import request_result.Register_Request;
 import request_result.Register_Responce;
-
-import java.sql.SQLException;
 
 /**
  * Used to service new register requests from people 
@@ -23,36 +19,43 @@ public class Register_Service {
      * @return
      */
     public Register_Responce register(Register_Request req)  {
-        Database db = new Database();
-        Register_Responce rep = null;
+        // Open database
+        Database database = new Database();
+        Register_Responce registerResponce = null;
         Person person = null;
         try {
-            generate_people gp = new generate_people();
-            person = gp.generatePerson(req.getGender(), 4, req.getUsername(), 4, db.openConnection());
+            // Generate people and update root person with user
+            generate_people generatePeople = new generate_people();
+            person = generatePeople.generatePerson(req.getGender(), 4, req.getUsername(), 4, database.openConnection());
             person.setLastName(req.getLastName());
             person.setFirstName(req.getFirstName());
-            PersonDAO pd = new PersonDAO(db.getConnection());
-            pd.update(person);
+            PersonDAO personDAO = new PersonDAO(database.getConnection());
+            personDAO.update(person);
         }
         catch (FileNotFoundException | DataAccessException e) {
             throw new RuntimeException(e);
         }
 
-        User user = new User(req.getUsername(), req.getPassword(), req.getEmail(), req.getFirstName(), req.getLastName(), req.getGender(), person.getPersonID());
+        // Build User
+        User user = new User(req.getUsername(), req.getPassword(), req.getEmail(),
+                req.getFirstName(), req.getLastName(), req.getGender(), person.getPersonID());
         try {
-            UserDAO ud = new UserDAO(db.getConnection());
-            ud.insert(user);
+            // Add authtoken for new user
+            UserDAO userDAO = new UserDAO(database.getConnection());
+            userDAO.insert(user);
             String authToken = UUID.randomUUID().toString();
-            rep = new Register_Responce(authToken, req.getUsername(), person.getPersonID(), true, null);
-            AuthtokenDAO ad = new AuthtokenDAO(db.getConnection());
+            registerResponce = new Register_Responce(authToken, req.getUsername(), person.getPersonID(), true, null);
+            AuthtokenDAO authtokenDAO = new AuthtokenDAO(database.getConnection());
             Authtoken token = new Authtoken(authToken, req.getUsername());
-            ad.insert(token);
-            db.closeConnection(true);
+            authtokenDAO.insert(token);
+            database.closeConnection(true);
         }
         catch (DataAccessException da){
-            rep = new Register_Responce(null, null, null, false, "Error: Failed to insert user");
-            db.closeConnection(false);
+            // Rollback changes
+            registerResponce = new Register_Responce(null, null, null,
+                    false, "Error: Failed to insert user");
+            database.closeConnection(false);
         }
-        return rep;
+        return registerResponce;
     }
 }

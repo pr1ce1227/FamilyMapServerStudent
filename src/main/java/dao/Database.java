@@ -11,9 +11,6 @@ public class Database {
      */
     private Connection conn;
 
-    // Whenever we want to make a change to our database we will have to open a connection and use
-    // Statements created by that connection to initiate transactions
-
     /**
      * open the connection to the database
      * @return
@@ -46,18 +43,11 @@ public class Database {
     public Connection getConnection() throws DataAccessException {
         if (conn == null) {
             return openConnection();
-        } else {
+        }
+        else {
             return conn;
         }
     }
-
-    // When we are done manipulating the database it is important to close the connection. This will
-    // end the transaction and allow us to either commit our changes to the database (if true is passed in)
-    // or rollback any changes that were made before we encountered a potential error (if false is passed in).
-
-    // IMPORTANT: IF YOU FAIL TO CLOSE A CONNECTION AND TRY TO REOPEN THE DATABASE THIS WILL CAUSE THE
-    // DATABASE TO LOCK. YOUR CODE MUST ALWAYS CLOSE THE DATABASE NO MATTER WHAT ERRORS
-    // OR PROBLEMS ARE ENCOUNTERED
 
     /**
      * close the database connection
@@ -68,15 +58,16 @@ public class Database {
             if (commit) {
                 // This will commit the changes to the database
                 conn.commit();
-            } else {
+            }
+            else {
                 // If we find out something went wrong, pass a false into closeConnection and this
                 // will rollback any changes we made during this connection
                 conn.rollback();
             }
             conn.close();
             conn = null;
-        } catch (SQLException e) {
-            // If you get here there are probably issues with your code and/or a connection is being left open
+        }
+        catch (SQLException e) {
             e.printStackTrace();
         }
     }

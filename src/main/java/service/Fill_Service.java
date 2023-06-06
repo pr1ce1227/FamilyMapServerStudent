@@ -1,52 +1,69 @@
 package service;
 
 import dao.*;
-
 import java.io.FileNotFoundException;
-import java.util.List;
-
 import model.*;
 import request_result.Fill_Responce;
 import request_result.Register_Responce;
 
 public class Fill_Service {
     public Fill_Responce fill(String userName, int generations){
-        Fill_Responce fr = new Fill_Responce("Error: In fill service", false);
+        // Default response
+        Fill_Responce fillResponce = new Fill_Responce("Error: In fill service", false);
 
-        Database db = new Database();
+        // Open database
+        Database database = new Database();
         try {
-            UserDAO ud = new UserDAO(db.openConnection());
-            if(ud.find(userName) != null){
-                User user =  ud.find(userName);
-                PersonDAO pd = new PersonDAO(db.getConnection());
-                pd.delete(user);
-                EventDAO ed = new EventDAO(db.getConnection());
-                ed.delete(user);
+            UserDAO userDAO = new UserDAO(database.openConnection());
+
+            // Check if username exists
+            if(userDAO.find(userName) != null){
+                // Remove all person with associated username
+                User user =  userDAO.find(userName);
+                PersonDAO personDAO = new PersonDAO(database.getConnection());
+                personDAO.delete(user);
+
+                // Remove all event with associated username
+                EventDAO eventDAO = new EventDAO(database.getConnection());
+                eventDAO.delete(user);
+
                 Register_Responce rep = null;
                 Person person = null;
-                generate_people gp = new generate_people();
 
-                person = gp.generatePerson(user.getGender(), generations, user.getUsername(), generations, db.getConnection());
+                // Generate 4 generations of people for user
+                generate_people generatePeople = new generate_people();
+                person = generatePeople.generatePerson(user.getGender(), generations, user.getUsername(),
+                        generations, database.getConnection());
 
-                // ******************************************** only use one connection
-                pd = new PersonDAO(db.getConnection());
+                // update base person with users information
+                personDAO = new PersonDAO(database.getConnection());
                 person.setLastName(user.getLastName());
                 person.setFirstName(user.getFirstName());
-                pd.update(person);
-                int numPeople = pd.getPeople(person.getAssociatedUsername()).length;
-                ed = new EventDAO(db.getConnection());
-                int numEvents = ed.getEvents(person.getAssociatedUsername()).length;
-                fr = new Fill_Responce("Successfully added " + numPeople + " persons and " + numEvents + " events to the database.", true);
-                db.closeConnection(true);
-                return fr;
+                personDAO.update(person);
+
+                // Get number of peple added
+                int numPeople = personDAO.getPeople(person.getAssociatedUsername()).length;
+                eventDAO = new EventDAO(database.getConnection());
+
+                // Get number of events added
+                int numEvents = eventDAO.getEvents(person.getAssociatedUsername()).length;
+
+                // Build repsonse
+                fillResponce = new Fill_Responce("Successfully added " + numPeople + " persons and "
+                        + numEvents + " events to the database.", true);
+
+                // Commit changes and return
+                database.closeConnection(true);
+                return fillResponce;
             }
-            db.closeConnection(false);
+            // Rollback changes
+            database.closeConnection(false);
         }
         catch (DataAccessException | FileNotFoundException e) {
-            db.closeConnection(false);
+            // Rollback changes
+            database.closeConnection(false);
             throw new RuntimeException(e);
         }
 
-
-        return  fr;}
+        return  fillResponce;}
 }

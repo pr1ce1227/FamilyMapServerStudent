@@ -1,6 +1,5 @@
 package request_result;
 
-import data.events;
 import model.Event;
 
 public class EventAll_Responce {

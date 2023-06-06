@@ -2,75 +2,96 @@ package service;
 
 import dao.*;
 import data.events;
-import data.persons;
 import model.Event;
-import model.Person;
 import request_result.EventAll_Responce;
 import request_result.Event_Request;
 import request_result.Event_Responce;
-import request_result.Person_Responce;
+
 
 public class Event_Service {
 
     public  Event_Service(){}
 
     public Event_Responce getEventObject(Event_Request req){
-        Database db = new Database();
-        Event_Responce er = null;
+        // Open database
+        Database database = new Database();
+        Event_Responce eventResponce = null;
         try {
-            EventDAO ed = new EventDAO(db.openConnection());
-            if (ed.find(req.getEventId()) != null){
-                Event event = ed.find(req.getEventId());
-                AuthtokenDAO ad = new AuthtokenDAO(db.getConnection());
-                if(ad.find(event.getAssociatedUsername()) != null) {
-                    if (ad.find(event.getAssociatedUsername()).getAuthtoken().equals(req.getToken())) {
-                        er = new Event_Responce(event.getAssociatedUsername(), event.getEventID(), event.getPersonID(), event.getLatitude(), event.getLongitude(), event.getCountry(), event.getCity(), event.getEventType(), event.getYear(), true, null);
+            EventDAO eventDAO = new EventDAO(database.openConnection());
+
+            // Verify event Id exists
+            if (eventDAO.find(req.getEventId()) != null){
+                Event event = eventDAO.find(req.getEventId());
+                AuthtokenDAO authtokenDAO = new AuthtokenDAO(database.getConnection());
+
+                // Verify username exists
+                if(authtokenDAO.find(event.getAssociatedUsername()) != null) {
+
+                    // verify username Authtoken and request authoken match, build object and return
+                    if (authtokenDAO.find(event.getAssociatedUsername()).getAuthtoken().equals(req.getToken())) {
+                        eventResponce = new Event_Responce(event.getAssociatedUsername(), event.getEventID(),
+                                event.getPersonID(), event.getLatitude(), event.getLongitude(), event.getCountry(),
+                                event.getCity(), event.getEventType(), event.getYear(), true, null);
                     }
                     else {
-                        er = new Event_Responce(null, null, null, null, null, null, null, null, null, false, "Error: Authtoken for this event doesn't belong to user");
+                        eventResponce = new Event_Responce(null, null, null, null,
+                                null, null, null, null, null, false,
+                                "Error: Authtoken for this event doesn't belong to user");
                     }
                 }
                 else {
-                    er = new Event_Responce(null, null, null, null, null, null, null, null, null, false, "Error: Authtoken for this event doesn't belong to user");
+                    eventResponce = new Event_Responce(null, null, null, null,
+                            null, null, null, null, null, false,
+                            "Error: Authtoken for this event doesn't belong to user");
                 }
             }
             else{
-                er = new Event_Responce(null, null, null, null, null, null, null, null, null, false, "Error: Could not find the event associated with eventID");
+                eventResponce = new Event_Responce(null, null, null, null,
+                        null, null, null, null, null, false,
+                        "Error: Could not find the event associated with eventID");
             }
-            db.closeConnection(true);
+            database.closeConnection(true);
         }
         catch (DataAccessException e) {
-            db.closeConnection(false);
+            database.closeConnection(false);
             throw new RuntimeException(e);
         }
 
-        return er;
+        return eventResponce;
     }
 
     public EventAll_Responce getFamilyEvents(String token){
-        Database db = new Database();
+        // Open database
+        Database database = new Database();
         try {
-            AuthtokenDAO ad = new AuthtokenDAO(db.openConnection());
-            String userName = ad.findUsername(token);
+            AuthtokenDAO authtokenDAO = new AuthtokenDAO(database.openConnection());
+            String userName = authtokenDAO.findUsername(token);
 
+            // Verify username exists
             if(userName != null) {
-                EventDAO ed = new EventDAO(db.getConnection());
-                Event[] ev = ed.getEvents(userName);
-                db.closeConnection(true);
-                events EV =  new events(ev);
 
+                // get event and return
+                EventDAO eventDAO = new EventDAO(database.getConnection());
+                Event[] eventDAOEvents = eventDAO.getEvents(userName);
+                database.closeConnection(true);
+                events EV =  new events(eventDAOEvents);
                 return new EventAll_Responce(EV.getEvents(), null, true);
             }
             else{
-                db.closeConnection(false);
+                // rollback changes
+                database.closeConnection(false);
             }
         }
         catch (DataAccessException e) {
-            db.closeConnection(false);
+            // rollback changes
+            database.closeConnection(false);
             throw new RuntimeException(e);
         }
-        EventAll_Responce ea = new EventAll_Responce(null, "Error: Authoken wasnt found", false);
-        return ea;
+
+        // Return failed object
+        EventAll_Responce eventALlResponse =
+                new EventAll_Responce(null, "Error: Authoken wasnt found", false);
+        return eventALlResponse;
     }
 
 }

@@ -1,9 +1,5 @@
 package request_result;
 
-import model.Person;
-
-import javax.swing.plaf.synth.SynthRadioButtonMenuItemUI;
-
 /**
  * Request for information on a specific person
  */

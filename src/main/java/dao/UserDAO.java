@@ -5,10 +5,6 @@ import model.User;
 import java.sql.Connection;
 import java.util.List;
 import java.sql.*;
-
-
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -24,13 +20,11 @@ public class UserDAO {
     }
 
     public void insert(User user) throws DataAccessException {
-        //We can structure our string to be similar to a sql command, but if we insert question
-        //marks we can change them later with help from the statement
+
+        // Insert user into user table based on user object
         String sql = "INSERT INTO user (username, password, email, firstName, lastName, gender, personID) VALUES(?,?,?,?,?,?,?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            //Using the statements built-in set(type) functions we can pick the question mark we want
-            //to fill in and give it a proper value. The first argument corresponds to the first
-            //question mark found in our sql String
+            // Insert actual values in the string
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPassword());
             stmt.setString(3, user.getEmail());
@@ -38,9 +32,10 @@ public class UserDAO {
             stmt.setString(5, user.getLastName());
             stmt.setString(6, user.getGender());
             stmt.setString(7, user.getPersonId());
-
+            // Execute the insert
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new DataAccessException("Error encountered while inserting a user into the database");
         }
@@ -49,19 +44,26 @@ public class UserDAO {
     public User find(String username) throws DataAccessException {
         User user;
         ResultSet rs;
+
+        // Find user based on unique  username
         String sql = "SELECT * FROM user WHERE username = ?;";
+
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
             rs = stmt.executeQuery();
+
+            // If user found build a user object and return
             if (rs.next()) {
                 user = new User(rs.getString("username"), rs.getString("password"),
                         rs.getString("email"), rs.getString("firstName"), rs.getString("lastName"),
                         rs.getString("gender"), rs.getString("personID"));
                 return user;
-            } else {
+            }
+            else {
                 return null;
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new DataAccessException("Error encountered while finding a user in the database");
         }
@@ -69,16 +71,20 @@ public class UserDAO {
     }
 
     public void clear() throws DataAccessException {
+        // Clear all users from user table
         String sql = "DELETE FROM user";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new DataAccessException("Error encountered while clearing the user table");
         }
     }
 
     public void delete(User us) throws DataAccessException {
+
+        // Delete user base on username
         String sql = "DELETE FROM user WHERE username = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -92,24 +98,4 @@ public class UserDAO {
             System.out.println(e.getMessage());
         }
     }
-
-    /**
-     * insert a sing user one row at a time
-     * @param user
-     * @throws DataAccessException
-     */
-
-
-    /**
-     * get a list of all the users currently in the databse
-     * @return a list of all user objects
-     */
-    public List<User> getUsers(){return  null;}
-
-    /**
-     * remove all the users from the database
-     * @throws DataAccessException
-     */
-
-
 }

@@ -8,51 +8,59 @@ import request_result.Load_Request;
 import request_result.Load_Responce;
 
 public class Load_Service {
-
-
-    public void Load_Service(){
-
-    }
+    public void Load_Service(){}
 
     public Load_Responce load(Load_Request req){
-        Database db = new Database();
-        Load_Responce lr = new Load_Responce("Error: failed to load date", false);;
-        try {
-            PersonDAO pd = new PersonDAO(db.openConnection());
-            pd.clear();
-            UserDAO ud = new UserDAO(db.getConnection());
-            ud.clear();
-            EventDAO ed = new EventDAO(db.getConnection());
-            ed.clear();
-            AuthtokenDAO ad = new AuthtokenDAO(db.getConnection());
-            ad.clear();
 
+        // Open database, build response
+        Database database = new Database();
+        Load_Responce loadResponce = null;
+
+        try {
+            // Clear all tables
+            PersonDAO personDAO = new PersonDAO(database.openConnection());
+            personDAO.clear();
+            UserDAO userDAO = new UserDAO(database.getConnection());
+            userDAO.clear();
+            EventDAO eventDAO = new EventDAO(database.getConnection());
+            eventDAO.clear();
+            AuthtokenDAO authtokenDAO = new AuthtokenDAO(database.getConnection());
+            authtokenDAO.clear();
+
+            // Build array for users persons and events found in request
             User[] users = req.getUsers();
             Person[] persons = req.getPersons();
             Event[] events = req.getEvents();
 
+            // Add all users
             for(User u : users){
-                ud.insert(u);
+                userDAO.insert(u);
             }
+
+            // Add all people
             for(Person p : persons){
-                pd.insert(p);
+                personDAO.insert(p);
             }
+
+            // Add all events
             for(Event e : events){
-                ed.insert(e);
+                eventDAO.insert(e);
             }
 
-            db.closeConnection(true);
+            database.closeConnection(true);
 
-            lr = new Load_Responce("Successfully added " + req.getUsers().length + " users, " + req.getPersons().length + " persons, and " + req.getEvents().length + " events", true);
+            // Build reponse
+            loadResponce = new Load_Responce("Successfully added " + req.getUsers().length + " users, " +
+                    req.getPersons().length + " persons, and " + req.getEvents().length + " events", true);
 
 
         }
         catch (DataAccessException e) {
-            db.closeConnection(false);
+            // rollback changes
+            database.closeConnection(false);
             throw new RuntimeException(e);
         }
 
-
-        return  lr;
+        return  loadResponce;
     }
 }

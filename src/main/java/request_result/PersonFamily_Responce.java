@@ -2,8 +2,6 @@ package request_result;
 
 import model.Person;
 
-import java.util.ArrayList;
-
 public class PersonFamily_Responce {
     Person[] data;
     String message;

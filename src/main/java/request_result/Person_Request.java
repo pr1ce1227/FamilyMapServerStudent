@@ -1,6 +1,5 @@
 package request_result;
 
-import model.Person;
 
 public class Person_Request {
     String personId;

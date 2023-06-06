@@ -16,60 +16,82 @@ public class Person_Service {
     public Person_Service() throws FileNotFoundException {
 
     }
-
     public Person_Responce getPersonObject(Person_Request req){
-        Database db = new Database();
-        Person_Responce pr = null;
+        // Open database build response
+        Database database = new Database();
+        Person_Responce personResponce = null;
         try {
-            PersonDAO pd = new PersonDAO(db.openConnection());
-            if (pd.find(req.getPersonId()) != null){
-                Person person = pd.find(req.getPersonId());
-                AuthtokenDAO ad = new AuthtokenDAO(db.getConnection());
-                if(ad.find(person.getAssociatedUsername()) != null) {
-                    if (ad.find(person.getAssociatedUsername()).getAuthtoken().equals(req.getToken())) {
-                        pr = new Person_Responce(person.getAssociatedUsername(), person.getPersonID(), person.getFirstName(), person.getLastName(), person.getGender(), person.getFatherID(), person.getMotherID(), person.getSpouseID(), null, true);
+            PersonDAO personDAO = new PersonDAO(database.openConnection());
+
+            // verify person id
+            if (personDAO.find(req.getPersonId()) != null){
+                Person person = personDAO.find(req.getPersonId());
+                AuthtokenDAO authtokenDAO = new AuthtokenDAO(database.getConnection());
+
+                // Verify username
+                if(authtokenDAO.find(person.getAssociatedUsername()) != null) {
+
+                    // Find person with username and verify authtoken
+                    if (authtokenDAO.find(person.getAssociatedUsername()).getAuthtoken().equals(req.getToken())) {
+                        // Build person
+                        personResponce = new Person_Responce(person.getAssociatedUsername(), person.getPersonID(),
+                                person.getFirstName(), person.getLastName(), person.getGender(),
+                                person.getFatherID(), person.getMotherID(), person.getSpouseID(),
+                                null, true);
                     }
                     else{
-                        pr = new Person_Responce(null, null, null, null, null, null, null, null,"Error: authoken doesn't exist", false );
+                        personResponce = new Person_Responce(null, null, null,
+                                null, null, null, null, null,
+                                "Error: authoken doesn't exist", false );
                     }
                 }
                 else{
-                    pr = new Person_Responce(null, null, null, null, null, null, null, null, "Error: authoken doesn't exist", false);
+                    personResponce = new Person_Responce(null, null, null,
+                            null, null, null, null, null,
+                            "Error: authoken doesn't exist", false);
                 }
             }
             else{
-                pr = new Person_Responce(null, null, null, null, null, null, null, null, "Error: authoken doesn't exist", false);
+                personResponce = new Person_Responce(null, null, null,
+                        null, null, null, null, null,
+                        "Error: authoken doesn't exist", false);
             }
-            db.closeConnection(true);
+            // COnfirm changes
+            database.closeConnection(true);
         }
         catch (DataAccessException e) {
-            db.closeConnection(false);
+            // Rollback changes
+            database.closeConnection(false);
             throw new RuntimeException(e);
         }
-
-        return pr;
+        return personResponce;
     }
 
     public PersonFamily_Responce getPersonFamily(String token){
-        Database db = new Database();
+        // Open Database
+        Database database = new Database();
         try {
-            AuthtokenDAO ad = new AuthtokenDAO(db.openConnection());
-            String userName = ad.findUsername(token);
+            AuthtokenDAO authtokenDAO = new AuthtokenDAO(database.openConnection());
+            String userName = authtokenDAO.findUsername(token);
 
+            // verify username
             if(userName != null) {
-                PersonDAO pd = new PersonDAO(db.getConnection());
-                Person[] people = pd.getPeople(userName);
-                db.closeConnection(true);
+                // Get all people with asosciated username and return
+                PersonDAO personDAO = new PersonDAO(database.getConnection());
+                Person[] people = personDAO.getPeople(userName);
+                database.closeConnection(true);
                 return new PersonFamily_Responce(people, null, true);
             }
-            db.closeConnection(false);
+            // ROllback changes
+            database.closeConnection(false);
         }
         catch (DataAccessException e) {
-            db.closeConnection(false);
+            // Rollback changes
+            database.closeConnection(false);
             throw new RuntimeException(e);
         }
-
-        return new PersonFamily_Responce(null, "Error: failed to find username associated with authtoken", false);
+        return new PersonFamily_Responce(null,
+                "Error: failed to find username associated with authtoken", false);
     }
 
 }

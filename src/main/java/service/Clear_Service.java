@@ -6,25 +6,29 @@ import request_result.Clear_Responce;
 public class Clear_Service {
 
     public Clear_Responce clear(){
-        Clear_Responce cr = null;
-        Database db = new Database();
+        Clear_Responce clearResponce = null;
+        Database database = new Database();
         try {
-            db.openConnection();
-            UserDAO ud = new UserDAO(db.getConnection());
+            // Open Dao for each table and clear
+            database.openConnection();
+            UserDAO ud = new UserDAO(database.getConnection());
             ud.clear();
-            PersonDAO pd = new PersonDAO(db.getConnection());
-            pd.clear();
-            EventDAO ed = new EventDAO(db.getConnection());
-            ed.clear();
-            AuthtokenDAO ad = new AuthtokenDAO(db.getConnection());
-            ad.clear();
-            cr = new Clear_Responce("Clear succeeded.", true);
-            db.closeConnection(true);
+            PersonDAO personDAO = new PersonDAO(database.getConnection());
+            personDAO.clear();
+            EventDAO eventDAO = new EventDAO(database.getConnection());
+            eventDAO.clear();
+            AuthtokenDAO authtokenDAO = new AuthtokenDAO(database.getConnection());
+            authtokenDAO.clear();
+
+            // Report success and close the connection
+            clearResponce = new Clear_Responce("Clear succeeded.", true);
+            database.closeConnection(true);
         }
         catch (DataAccessException da){
-            cr = new Clear_Responce("Error: Failed to clear", false);
-            db.closeConnection(false);
+            clearResponce = new Clear_Responce("Error: Failed to clear", false);
+            // Rollback the changes
+            database.closeConnection(false);
         }
-        return  cr;
+        return  clearResponce;
     }
 }

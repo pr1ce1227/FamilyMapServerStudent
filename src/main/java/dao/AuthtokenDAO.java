@@ -1,14 +1,10 @@
 package dao;
 
 import model.Authtoken;
-import model.Person;
-import model.User;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Interface for the Authtoken objects and the sql database
@@ -23,8 +19,7 @@ public class AuthtokenDAO {
      * Constructed by establishing a cnnectiong to the SQL database
      * @param conn the connection variable to the database
      */
-    public AuthtokenDAO(Connection conn) {this.conn = conn;
-    }
+    public AuthtokenDAO(Connection conn) {this.conn = conn;}
 
     /**
      * Used to insert tokens into the database one row at a time
@@ -32,16 +27,17 @@ public class AuthtokenDAO {
      * @throws DataAccessException
      */
     public void insert(Authtoken authtoken) throws DataAccessException{
+
+        // Insert row int Authtoken table
         String sql = "INSERT INTO Authtoken (authtoken, username) VALUES(?,?)";
+
+        // Load in the actual values and update the database
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            //Using the statements built-in set(type) functions we can pick the question mark we want
-            //to fill in and give it a proper value. The first argument corresponds to the first
-            //question mark found in our sql String
             stmt.setString(1, authtoken.getAuthtoken());
             stmt.setString(2, authtoken.getUsername());
-
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new DataAccessException("Error encountered while inserting an authtoken into the database");
         }
@@ -56,17 +52,27 @@ public class AuthtokenDAO {
     public Authtoken find(String userName) throws DataAccessException{
         Authtoken token;
         ResultSet rs;
+
+        // Find authtoken based on username
         String sql = "SELECT * FROM Authtoken WHERE username = ?;";
+
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Update queery with values then execute
             stmt.setString(1, userName);
             rs = stmt.executeQuery();
+
+            // Grab the value if one exists
             if (rs.next()) {
                 token = new Authtoken(rs.getString("authtoken"), rs.getString("username"));
                 return token;
-            } else {
+            }
+            else {
                 return null;
             }
-        } catch (SQLException e) {
+        }
+
+        catch (SQLException e) {
             e.printStackTrace();
             throw new DataAccessException("Error encountered while finding a user in the database");
         }
@@ -75,37 +81,46 @@ public class AuthtokenDAO {
     public String findUsername(String token) throws DataAccessException{
         ResultSet rs;
         Authtoken at;
+
+        // Find username based on authtoken
         String sql = "SELECT * FROM Authtoken WHERE authtoken = ?;";
+
+        // Update with values and execute the queery
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, token);
             rs = stmt.executeQuery();
+
+            // If value found return else return null
             if (rs.next()) {
                 at = new Authtoken(rs.getString("authtoken"), rs.getString("username"));
                 return at.getUsername();
-            } else {
+            }
+            else {
                 return null;
             }
-        } catch (SQLException e) {
+
+        }
+
+        catch (SQLException e) {
             e.printStackTrace();
             throw new DataAccessException("Error encountered while finding a user in the database");
         }
     }
 
     /**
-     * list all of the tokens currently in the database
-     * @return
-     */
-    public List<Authtoken> getTokens(){return  null;}
-
-    /**
      * clear all of the tokens in the database
      * @throws DataAccessException
      */
     public void clear() throws DataAccessException {
+
+        // Clear all the authtoken table
         String sql = "DELETE FROM Authtoken";
+
+        // Execute the clear
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new DataAccessException("Error encountered while clearing the Authtoken table");
         }
@@ -118,6 +133,7 @@ public class AuthtokenDAO {
      */
     public void delete(String user) throws DataAccessException{
 
+        // Delete authtoken based on username
         String sql = "DELETE FROM Authtoken WHERE username = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -127,19 +143,25 @@ public class AuthtokenDAO {
             // execute the delete statement
             stmt.executeUpdate();
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     public void update(Authtoken token) throws DataAccessException {
+
+        // Update authoken row based on username
         String sql = "UPDATE Authtoken SET authtoken = ? WHERE username = ?";
+
+        // Update entire row based on the new object
         try (PreparedStatement stmt = conn.prepareStatement(sql)){
             stmt.setString(1, token.getAuthtoken());
             stmt.setString(2, token.getUsername());
             // execute the delete statement
             stmt.executeUpdate();
         }
+
         catch (SQLException e) {
             System.out.println(e.getMessage());
         }
