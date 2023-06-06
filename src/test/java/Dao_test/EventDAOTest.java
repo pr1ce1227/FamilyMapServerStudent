@@ -1,9 +1,14 @@
-package dao;
+package Dao_test;
 
+import dao.DataAccessException;
+import dao.Database;
+import dao.EventDAO;
 import model.Event;
+import model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import data.events;
 
 import java.sql.Connection;
 
@@ -13,22 +18,37 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EventDAOTest {
     private Database db;
     private Event bestEvent;
+    private Event worstEvent;
     private EventDAO eDao;
+
+    Connection conn;
+
+    private User user;
 
     @BeforeEach
     public void setUp() throws DataAccessException {
         // Here we can set up any classes or variables we will need for each test
         // lets create a new instance of the Database class
         db = new Database();
+
         // and a new event with random data
         bestEvent = new Event("Biking_123A", "Gale", "Gale123A",
                 35.9f, 140.1f, "Japan", "Ushiku",
                 "Biking_Around", 2016);
 
+        worstEvent = new Event("Walking_123A", "Gale", "Gale12A",
+                35.9f, 140.1f, "Japan", "Ushiku",
+                "Biking_Around", 2016);
+
+        user = new User("Gale", "Price", "gmail", "shad",
+                "Montierth", "m", "12345" );
+
         // Here, we'll open the connection in preparation for the test case to use it
-        Connection conn = db.getConnection();
+        conn = db.openConnection();
+
         //Then we pass that connection to the EventDAO, so it can access the database.
         eDao = new EventDAO(conn);
+
         //Let's clear the database as well so any lingering data doesn't affect our tests
         eDao.clear();
     }
@@ -38,7 +58,7 @@ public class EventDAOTest {
         // Here we close the connection to the database file, so it can be opened again later.
         // We will set commit to false because we do not want to save the changes to the database
         // between test cases.
-        db.closeConnection(false);
+        db.closeConnection(true);
     }
 
     @Test
@@ -56,39 +76,84 @@ public class EventDAOTest {
 
     @Test
     public void insertPass() throws DataAccessException {
-        // Start by inserting an event into the database.
+        // Insert into database
         eDao.insert(bestEvent);
-        // Let's use a find method to get the event that we just put in back out.
+
+        // Verify in database
         Event compareTest = eDao.find(bestEvent.getEventID());
-        // First lets see if our find method found anything at all. If it did then we know that we got
-        // something back from our database.
         assertNotNull(compareTest);
-        // Now lets make sure that what we put in is the same as what we got out. If this
-        // passes then we know that our insert did put something in, and that it didn't change the
-        // data in any way.
-        // This assertion works by calling the equals method in the Event class.
         assertEquals(bestEvent, compareTest);
     }
 
     @Test
     public void insertFail() throws DataAccessException {
-        // Let's do this test again, but this time lets try to make it fail.
-        // If we call the method the first time the event will be inserted successfully.
+        // Attempt to insert same event
         eDao.insert(bestEvent);
 
-        // However, our sql table is set up so that the column "eventID" must be unique, so trying to insert
-        // the same event again will cause the insert method to throw an exception, and we can verify this
-        // behavior by using the assertThrows assertion as shown below.
-
-        // Note: This call uses a lambda function. A lambda function runs the code that comes after
-        // the "()->", and the assertThrows assertion expects the code that ran to throw an
-        // instance of the class in the first parameter, which in this case is a DataAccessException.
+        // verify exception is thrown
         assertThrows(DataAccessException.class, () -> eDao.insert(bestEvent));
     }
 
     @Test
-    public void clearSuccess() throws DataAccessException {
+    public void deletePass() throws DataAccessException {
+        // Insert into database
         eDao.insert(bestEvent);
+
+        // Verify in database
+        Event compareTest = eDao.find(bestEvent.getEventID());
+        assertNotNull(compareTest);
+        assertEquals(1, eDao.delete(user));
+    }
+
+    @Test
+    public void deleteFail() throws DataAccessException {
+        // Don't insert item and try to delete
+        // Verify nothing was deleted
+        assertEquals(0, eDao.delete(user));
+    }
+
+    @Test
+    public void getEventsPass() throws DataAccessException {
+        // Insert into database
+        eDao.insert(bestEvent);
+        eDao.insert(worstEvent);
+        Event[] ev = {bestEvent,worstEvent};
+        events Events = new events(ev);
+        events ev2 = new events(eDao.getEvents(bestEvent.getAssociatedUsername()));
+        assertNotNull(ev2);
+        assertEquals(Events, ev2);
+    }
+
+    @Test
+    public void getEventsFail() throws DataAccessException {
+        // Insert into database
+        eDao.insert(bestEvent);
+        eDao.insert(worstEvent);
+        Event[] ev = {bestEvent, worstEvent};
+        events Events = new events(ev);
+
+        // Look for event that doens't exist
+        assertThrows(DataAccessException.class, () -> eDao.getEvents("random"));
+    }
+
+
+
+    @Test
+    public void clearSuccess1() throws DataAccessException {
+        eDao.insert(bestEvent);
+        Event compareTest3 = eDao.find(bestEvent.getEventID());
+        assertNotNull(compareTest3);
+        assertEquals(bestEvent, compareTest3);
+
+        eDao.clear();
+        Event compareTest2 = eDao.find(bestEvent.getEventID());
+        assertNull(compareTest2);
+    }
+
+    @Test
+    public void clearSuccess2() throws DataAccessException {
+        eDao.insert(bestEvent);
+        eDao.insert(worstEvent);
         Event compareTest3 = eDao.find(bestEvent.getEventID());
         assertNotNull(compareTest3);
         assertEquals(bestEvent, compareTest3);

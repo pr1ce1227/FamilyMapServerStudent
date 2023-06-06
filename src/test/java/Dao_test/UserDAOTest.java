@@ -1,4 +1,4 @@
-package dao;
+package Dao_test;
 
 import dao.DataAccessException;
 import dao.Database;
@@ -18,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserDAOTest {
     private Database db;
     private User bestUser;
+    private User worstUser;
     private UserDAO uDao;
+    private User user;
 
     @BeforeEach
     public void setUp() throws DataAccessException {
@@ -29,8 +31,14 @@ public class UserDAOTest {
         bestUser = new User("person123", "pr1ce12", "Caleb@gmail.com",
                 "caleb", "price", "m", "cal123");
 
+        worstUser = new User("person555", "pr1ce12", "roof@gmail.com",
+                "Rachael", "price", "m", "cal123");
+
+        user = new User("Gale", "Price", "gmail", "shad",
+                "Montierth", "m", "12345" );
+
         // Here, we'll open the connection in preparation for the test case to use it
-        Connection conn = db.getConnection();
+        Connection conn = db.openConnection();
         //Then we pass that connection to the EventDAO, so it can access the database.
         uDao = new UserDAO(conn);
         //Let's clear the database as well so any lingering data doesn't affect our tests
@@ -91,8 +99,39 @@ public class UserDAOTest {
     }
 
     @Test
-    public void clearSuccess() throws DataAccessException {
+    public void deletePass() throws DataAccessException {
+        // Insert into database
         uDao.insert(bestUser);
+
+        // Verify in database
+        User compareTest = uDao.find(bestUser.getUsername());
+        assertNotNull(compareTest);
+        assertEquals(1, uDao.delete(bestUser));
+    }
+
+    @Test
+    public void deleteFail() throws DataAccessException {
+        // Don't insert item and try to delete
+        // Verify nothing was deleted
+        assertThrows(DataAccessException.class, () ->  uDao.delete(user));
+    }
+
+    @Test
+    public void clearSuccess1() throws DataAccessException {
+        uDao.insert(bestUser);
+        User compareTest3 = uDao.find(bestUser.getUsername());
+        assertNotNull(compareTest3);
+        assertEquals(bestUser, compareTest3);
+
+        uDao.clear();
+        User compareTest2 = uDao.find(bestUser.getUsername());
+        assertNull(compareTest2);
+    }
+
+    @Test
+    public void clearSuccess2() throws DataAccessException {
+        uDao.insert(bestUser);
+        uDao.insert(worstUser);
         User compareTest3 = uDao.find(bestUser.getUsername());
         assertNotNull(compareTest3);
         assertEquals(bestUser, compareTest3);

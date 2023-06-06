@@ -82,7 +82,7 @@ public class UserDAO {
         }
     }
 
-    public void delete(User us) throws DataAccessException {
+    public int delete(User us) throws DataAccessException {
 
         // Delete user base on username
         String sql = "DELETE FROM user WHERE username = ?";
@@ -92,10 +92,16 @@ public class UserDAO {
             // set the corresponding param
             stmt.setString(1, us.getUsername());
             // execute the delete statement
-            stmt.executeUpdate();
+            int num = stmt.executeUpdate();
+
+            if(num == 0){
+                throw new DataAccessException("User doesn't exist to delte");
+            }
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            throw new DataAccessException("User doesn't exist to delte");
         }
+        return 1;
     }
 }

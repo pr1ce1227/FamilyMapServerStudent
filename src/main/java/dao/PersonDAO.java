@@ -90,7 +90,7 @@ public class PersonDAO {
         }
     }
 
-    public void delete(User user) throws DataAccessException {
+    public int delete(User user) throws DataAccessException {
 
         // Delete person based on username
         String sql = "DELETE FROM person WHERE associatedUsername = ?";
@@ -100,12 +100,13 @@ public class PersonDAO {
             // set the corresponding param
             stmt.setString(1, user.getUsername());
             // execute the delete statement
-            stmt.executeUpdate();
+            return stmt.executeUpdate();
         }
 
         catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return 0;
     }
 
     public void update(Person p) throws DataAccessException {
@@ -123,7 +124,10 @@ public class PersonDAO {
             stmt.setString(8, p.getPersonID());
 
             // execute the delete statement
-            stmt.executeUpdate();
+            int num = stmt.executeUpdate();
+            if(num == 0){
+                throw new DataAccessException("Person not found for update");
+            }
         }
         catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -135,7 +139,7 @@ public class PersonDAO {
      * list all of the people currently in the data base
      * @return a list of people objects
      */
-    public Person[] getPeople(String username){
+    public Person[] getPeople(String username) throws DataAccessException{
         Set<Person> persons = new HashSet<>();
 
         Person person = null;
@@ -158,7 +162,7 @@ public class PersonDAO {
 
             // Check if anyone was added, then add to an array to help with json deserialization
             if(persons.isEmpty()){
-                return null;
+                throw new DataAccessException("Person not found");
             }
             else{
                 Person[] people = new Person[persons.size()];

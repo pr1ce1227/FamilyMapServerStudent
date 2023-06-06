@@ -88,47 +88,26 @@ public class EventDAO {
         }
     }
 
-    public void delete(User user) throws DataAccessException {
+    public int delete(User user) throws DataAccessException {
 
         // Delete row from event based on username
         String sql = "DELETE FROM Events WHERE associatedUsername = ?";
-
+        int response = 0;
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param
             stmt.setString(1, user.getUsername());
             // execute the delete statement
-            stmt.executeUpdate();
+            response = stmt.executeUpdate();
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+
+        return response;
     }
 
-    public void update(Event e) throws DataAccessException {
-
-        // Update entire event based on person id with input event object
-        String sql = "UPDATE Events SET eventID = ?, associatedUsername = ?, latitude = ?, longitude = ?, country = ?, city = ?, eventType = ?, year = ? WHERE personID = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)){
-            stmt.setString(1, e.getEventID());
-            stmt.setString(2, e.getAssociatedUsername());
-            stmt.setFloat(3, e.getLatitude());
-            stmt.setFloat(4, e.getLongitude());
-            stmt.setString(5, e.getCountry());
-            stmt.setString(6, e.getCity());
-            stmt.setString(7, e.getEventType());
-            stmt.setInt(8, e.getYear());
-            stmt.setString(9, e.getPersonID());
-
-            // execute the delete statement
-            stmt.executeUpdate();
-        }
-        catch (SQLException ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
-
-    public Event[] getEvents(String username){
+    public Event[] getEvents(String username) throws DataAccessException{
         Set<Event> events = new HashSet<>();
         Event event = null;
         ResultSet rs;
@@ -143,14 +122,16 @@ public class EventDAO {
             // Grab every event and add it to the event Set
             while(rs.next()) {
                 event = new Event(rs.getString("eventID"), rs.getString("associatedUsername"),
-                        rs.getString("personID"), rs.getFloat("latitude"), rs.getFloat("longitude"),
-                        rs.getString("country"), rs.getString("city"), rs.getString("eventType"), rs.getInt("year"));
+                        rs.getString("personID"), rs.getFloat("latitude"),
+                        rs.getFloat("longitude"), rs.getString("country"),
+                        rs.getString("city"), rs.getString("eventType"),
+                        rs.getInt("year"));
                 events.add(event);
             }
 
             // Check that an event was actually added
             if(events.isEmpty()){
-                return null;
+               throw new DataAccessException("Username not found");
             }
 
             // Insert all the events into an array, this is to help with json serialization
@@ -167,7 +148,6 @@ public class EventDAO {
         catch (SQLException e) {
             e.printStackTrace();
         }
-
         return  null;
     }
 }

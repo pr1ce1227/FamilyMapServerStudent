@@ -131,7 +131,7 @@ public class AuthtokenDAO {
      * @param user
      * @throws DataAccessException
      */
-    public void delete(String user) throws DataAccessException{
+    public int delete(String user) throws DataAccessException{
 
         // Delete authtoken based on username
         String sql = "DELETE FROM Authtoken WHERE username = ?";
@@ -141,12 +141,16 @@ public class AuthtokenDAO {
             // set the corresponding param
             stmt.setString(1, user);
             // execute the delete statement
-            stmt.executeUpdate();
+            int num = stmt.executeUpdate();
+            if(num == 0){
+                throw new DataAccessException("User not found to delete authtoken");
+            }
 
         }
         catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return 1;
     }
 
     public void update(Authtoken token) throws DataAccessException {
@@ -159,7 +163,11 @@ public class AuthtokenDAO {
             stmt.setString(1, token.getAuthtoken());
             stmt.setString(2, token.getUsername());
             // execute the delete statement
-            stmt.executeUpdate();
+            int num = stmt.executeUpdate();
+
+            if(num == 0){
+                throw new DataAccessException("failed to update authtoken");
+            }
         }
 
         catch (SQLException e) {
