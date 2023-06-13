@@ -3,7 +3,6 @@ package dao;
 import model.User;
 
 import java.sql.Connection;
-import java.util.List;
 import java.sql.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

@@ -1,6 +1,5 @@
 package request_result;
 
-import service.Register_Service;
 
 /**
  * request to create a new user

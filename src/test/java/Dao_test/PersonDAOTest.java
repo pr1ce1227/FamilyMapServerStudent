@@ -3,7 +3,6 @@ package Dao_test;
 import dao.DataAccessException;
 import dao.Database;
 import dao.PersonDAO;
-import data.events;
 import data.persons;
 import model.Event;
 import model.Person;
